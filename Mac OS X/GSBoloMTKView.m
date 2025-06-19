@@ -9,7 +9,6 @@
 #import "GSBoloMTKView.h"
 
 #import "GSXBoloController.h"
-#import "GSBoloViews.h"
 #import "GSBoloScene.h"
 #import "GSBoloMetalRenderer.h"
 
@@ -45,8 +44,6 @@ static NSCursor *cursor = nil;
 
 - (instancetype)initWithFrame:(NSRect)frameRect {
   if (self = [super initWithFrame:frameRect device:nil]) {
-    [GSBoloViews addView:self];
-
     [self chooseDevice];
 
     self.preferredFramesPerSecond = 16;

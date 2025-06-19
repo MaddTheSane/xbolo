@@ -11,6 +11,7 @@
 #import "GSBoloMTKView.h"
 #import "GSBoloSKView.h"
 #import "GSBoloDrawRectView.h"
+#import "GSBoloViews.h"
 
 @interface GSBoloWrapperView() {
   id<GSBoloViewProtocol> _wrapped;
@@ -33,34 +34,43 @@
     _boundsChangeObserver = [[NSNotificationCenter defaultCenter] addObserverForName:NSViewFrameDidChangeNotification object:self queue:nil usingBlock:^(NSNotification * _Nonnull note) {
       [weakSelf boundsDidChange];
     }];
-    
-    if (@available(macOS 10.13, *)) {
-      if ([GSBoloMTKView canUseMetal]) {
-        _wrapped = [[GSBoloMTKView alloc] initWithFrame:self.bounds];
-        [self addSubview:(NSView *)_wrapped];
-      }
-    }
-
-    if (!_wrapped) {
-      if (@available(macOS 10.12, *)) {
-        _wrapped = [[GSBoloSKView alloc] initWithFrame:self.bounds];
-        [self addSubview:(NSView *)_wrapped];
-      } else {
-        NSScrollView *scrollView = [[NSScrollView alloc] initWithFrame:self.bounds];
-        _wrapped = [[GSBoloDrawRectView alloc] initWithFrame:NSMakeRect(0, 0, 4096, 4096)];
-        NSView *wrappedView = (NSView *)_wrapped;
-        scrollView.documentView = wrappedView;
-        [self addSubview:scrollView];
-        _scrollView = scrollView;
-      }
-    }
   }
 
   return self;
 }
 
-- (void)awakeFromNib {
+- (void)createWrappedView {
+  // Remove existing view
+  if (_wrapped) {
+    [(NSView *)_wrapped removeFromSuperview];
+    [GSBoloViews removeView:_wrapped];
+    _wrapped = nil;
+  }
+
+  // Create bolo view
+  if (@available(macOS 10.13, *)) {
+    if ([GSBoloMTKView canUseMetal]) {
+      _wrapped = [[GSBoloMTKView alloc] initWithFrame:self.bounds];
+      [self addSubview:(NSView *)_wrapped];
+    }
+  }
+
+  if (!_wrapped) {
+    if (@available(macOS 10.12, *)) {
+      _wrapped = [[GSBoloSKView alloc] initWithFrame:self.bounds];
+      [self addSubview:(NSView *)_wrapped];
+    } else {
+      NSScrollView *scrollView = [[NSScrollView alloc] initWithFrame:self.bounds];
+      _wrapped = [[GSBoloDrawRectView alloc] initWithFrame:NSMakeRect(0, 0, 4096, 4096)];
+      NSView *wrappedView = (NSView *)_wrapped;
+      scrollView.documentView = wrappedView;
+      [self addSubview:scrollView];
+      _scrollView = scrollView;
+    }
+  }
+
   _wrapped.boloController = boloController;
+  [GSBoloViews addView:_wrapped];
 }
 
 - (void)boundsDidChange {
@@ -76,6 +86,7 @@
 }
 
 - (void)reset {
+  [self createWrappedView];
   [_wrapped reset];
 }
 

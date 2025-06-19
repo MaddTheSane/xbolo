@@ -2580,7 +2580,7 @@ ERRHANDLER(0, -1)
 END
 }
 
-int recvclbuildpill(player) {
+int recvclbuildpill(int player) {
   struct CLBuildPill *clbuildpill;
 
   assert(player >= 0);

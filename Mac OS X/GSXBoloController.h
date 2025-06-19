@@ -29,6 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 
   // host game outlets
   IBOutlet NSTextField *hostMapField;
+  IBOutlet NSButton *hostMapResetButton;
   IBOutlet NSButton *hostUPnPSwitch;
   IBOutlet NSTextField *hostPortField;
   IBOutlet NSButton *hostPasswordSwitch;
@@ -150,6 +151,7 @@ NS_ASSUME_NONNULL_BEGIN
 
   // host pane data
   NSURL *hostMapURL;
+  NSURL *defaultHostMapURL;
   unsigned short hostPortNumber;
   BOOL hostPasswordBool;
   BOOL hostUPnPBool;

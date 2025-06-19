@@ -346,6 +346,15 @@ static void getlisttrackerstatus(int status);
   [self setHostHiddenMines:[defaults boolForKey:GSHostHiddenMines]];
   [self setHostTracker:[defaults boolForKey:GSHostTracker]];
   [self setHostGameType:(int)[defaults integerForKey:GSHostGameType]];
+  
+  // load default map
+  defaultHostMapURL = [[NSBundle mainBundle] URLForResource:@"Everard Island" withExtension:@"bmap"];
+  if (!hostMapURL && defaultHostMapURL) {
+    [self setHostMap:defaultHostMapURL];
+    hostMapResetButton.enabled = false;
+  } else {
+    hostMapResetButton.enabled = true;
+  }
 
   // init host domination pane
   [self setHostDominationType:(int)[defaults integerForKey:GSHostDominationType]];
@@ -666,20 +675,21 @@ static void getlisttrackerstatus(int status);
 // accessor methods
 
 @synthesize hostMap=hostMapURL;
-- (void)setHostMap:(NSURL *)aString {
-  if (!aString) {
+- (void)setHostMap:(NSURL *)aURL {
+  if (!aURL) {
     hostMapURL = nil;
     hostMapField.stringValue = @"";
   } else {
-    hostMapURL = [aString copy];
-    id hostMapName = nil;
-    if ([aString getResourceValue:&hostMapName forKey:NSURLLocalizedNameKey error:NULL]) {
-      hostMapField.stringValue = hostMapName;
+    hostMapURL = [aURL copy];
+    NSString *hostMapName = nil;
+    if ([aURL getResourceValue:&hostMapName forKey:NSURLLocalizedNameKey error:NULL]) {
+      hostMapField.stringValue = hostMapName.stringByDeletingPathExtension;
     } else {
-      hostMapField.stringValue = aString.lastPathComponent;
+      hostMapField.stringValue = aURL.lastPathComponent.stringByDeletingPathExtension;
     }
-    [[NSUserDefaults standardUserDefaults] setURL:aString forKey:GSHostMap];
+    [[NSUserDefaults standardUserDefaults] setURL:aURL forKey:GSHostMap];
   }
+  hostMapResetButton.enabled = hostMapURL != defaultHostMapURL;
 }
 
 @synthesize hostUPnP=hostUPnPBool;
@@ -949,12 +959,14 @@ END
   [allegiancePanel orderOut:self];
   [messagesPanel orderOut:self];
 
-  /* remove port mapping */
-  for (TCMPortMapping *portMapping in [portMapper portMappings]) {
-    [portMapper removePortMapping:portMapping];
+  if (hostUPnPBool) {
+    /* remove port mapping */
+    for (TCMPortMapping *portMapping in [portMapper portMappings]) {
+      [portMapper removePortMapping:portMapping];
+    }
+    
+    [portMapper start];
   }
-
-  [portMapper start];
 
   stopclient();
 
@@ -982,6 +994,10 @@ END
       [self setHostMap:panel.URLs[0]];
     }
   }];
+}
+
+- (IBAction)hostResetMap:(id)sender {
+  [self setHostMap:defaultHostMapURL];
 }
 
 - (IBAction)hostUPnPSwitch:(NSButton*)sender {
@@ -1162,7 +1178,7 @@ END
   [newGameWindow makeFirstResponder:nil];
 
 TRY
-  if (hostMapURL == nil && (mapData = [NSData dataWithContentsOfURL:[[NSBundle mainBundle] URLForResource:@"Everard Island" withExtension:@"bmap"]]) == nil) {
+  if (hostMapURL == nil) {
     NSAlert *alert = [[NSAlert alloc] init];
     alert.messageText = NSLocalizedString(@"No map chosen.", @"No map chosen.");
     alert.informativeText = NSLocalizedString(@"Please try another map.", @"Please try another map.");

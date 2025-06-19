@@ -9,7 +9,6 @@
 #import "GSBoloSKView.h"
 
 #import "GSXBoloController.h"
-#import "GSBoloViews.h"
 #import "GSBoloScene.h"
 
 #import "bolo.h"
@@ -42,7 +41,6 @@ static NSCursor *cursor = nil;
 
 - (instancetype)initWithFrame:(NSRect)frameRect {
   if (self = [super initWithFrame:frameRect]) {
-    [GSBoloViews addView:self];
     self.showsFPS = YES;
     self.showsNodeCount = YES;
     self.preferredFramesPerSecond = 16;

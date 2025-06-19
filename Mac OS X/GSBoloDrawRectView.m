@@ -1,6 +1,5 @@
 #import "GSBoloDrawRectView.h"
 #import "GSXBoloController.h"
-#import "GSBoloViews.h"
 
 #include "tiles.h"
 #include "images.h"
@@ -64,7 +63,6 @@ size_t RoundBytesPerRow(size_t bytesPerRow) {
 TRY
   if (self = [super initWithFrame:frameRect]) {
     if (initlist(&rectlist) == -1) LOGFAIL(errno)
-      [GSBoloViews addView:self];
 
     _zoom = 1.0;
   }
